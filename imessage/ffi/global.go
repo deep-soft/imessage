@@ -20,11 +20,7 @@ import (
 	"context"
 	_ "embed"
 	"encoding/gob"
-	"encoding/json"
 	"errors"
-	"fmt"
-	"os"
-	"path/filepath"
 	"reflect"
 	"strings"
 	"sync/atomic"
@@ -139,36 +135,6 @@ func init() {
 
 	// Beeper Mini is back to using Mac identifiers
 	ids.PreferiPhoneVersions = false
-
-	must(0, json.Unmarshal(must(os.ReadFile("config.json")), &global.Cfg))
-
-	global.NAC = &nacserv.Client{
-		URL:     global.Cfg.NACServURL,
-		Token:   global.Cfg.NACServToken,
-		IsRelay: global.Cfg.NACServIsRelay,
-
-		BeeperToken: global.Cfg.IMAToken,
-	}
-
-	global.IM = direct.NewConnector(global.NAC, handleEvent, nil, nil, global.Cfg.EnablePairECSending, nil, manualLookupRatelimiter)
-	global.IM.LoginTestConfig = global.Cfg.LoginTest
-
-	global.SecondaryIM = direct.NewConnector(global.NAC, handleSecondaryEvent, nil, nil, false, nil, manualLookupRatelimiter)
-	if global.Cfg.AttachmentDir == "" {
-		global.Cfg.AttachmentDir = "attachments"
-	}
-	if global.Cfg.DeviceName != "" {
-		ids.DeviceName = global.Cfg.DeviceName
-	}
-	var err error
-	global.Cfg.AttachmentDir, err = filepath.Abs(global.Cfg.AttachmentDir)
-	if err != nil {
-		panic(fmt.Errorf("failed to get absolute path of attachment directory: %w", err))
-	}
-	err = os.MkdirAll(global.Cfg.AttachmentDir, 0700)
-	if err != nil {
-		panic(fmt.Errorf("failed to create attachment directory: %w", err))
-	}
 }
 
 func (imc *IMContext) GetMatrixReply(ctx context.Context, msg *imessage.Message) (threadRoot, replyFallback id.EventID) {
