@@ -397,3 +397,8 @@ func init_config(data *C.char, n C.int) {
 		panic(fmt.Errorf("failed to create attachment directory: %w", err))
 	}
 }
+
+//export add
+func add(a, b C.int) C.int {
+	return a + b
+}
